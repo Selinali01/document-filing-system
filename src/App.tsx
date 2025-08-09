@@ -8,22 +8,6 @@ import { Spinner } from '@/components/ui/spinner';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-interface Client {
-  id: string;
-  name: string;
-  webViewLink?: string;
-  createdTime?: string;
-  isPending?: boolean;
-}
-
-interface DocumentTemplate {
-  id: string;
-  name: string;
-  webViewLink?: string;
-  mimeType?: string;
-  isPending?: boolean;
-}
-
 interface FormField {
   id: number;
   page: number;
@@ -45,25 +29,8 @@ interface NewTemplateData {
 const API_BASE_URL = 'http://localhost:5678/webhook';
 
 // API Functions
-const fetchClients = async (): Promise<Client[]> => {
-  const response = await fetch(`${API_BASE_URL}/list_clients`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!response.ok) throw new Error('Failed to fetch clients');
-  return response.json();
-};
 
-const fetchTemplates = async (): Promise<DocumentTemplate[]> => {
-  const response = await fetch(`${API_BASE_URL}/list_documents`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!response.ok) throw new Error('Failed to fetch templates');
-  return response.json();
-};
-
-const uploadClient = async (clientData: NewClientData): Promise<Client> => {
+const uploadClient = async (clientData: NewClientData): Promise<void> => {
   const formData = new FormData();
   formData.append('field-0', clientData.name);
   formData.append('field-1', clientData.docType);
@@ -81,16 +48,9 @@ const uploadClient = async (clientData: NewClientData): Promise<Client> => {
   });
   
   if (!response.ok) throw new Error('Failed to upload client');
-  
-  // Return optimistic client data since backend doesn't return the created client
-  return {
-    id: `temp-${Date.now()}`,
-    name: clientData.name,
-    createdTime: new Date().toISOString(),
-  };
 };
 
-const uploadTemplate = async (templateData: NewTemplateData): Promise<DocumentTemplate> => {
+const uploadTemplate = async (templateData: NewTemplateData): Promise<void> => {
   const formData = new FormData();
   templateData.documents.forEach(file => {
     formData.append('field-0', file);
@@ -102,182 +62,36 @@ const uploadTemplate = async (templateData: NewTemplateData): Promise<DocumentTe
   });
   
   if (!response.ok) throw new Error('Failed to upload template');
-  
-  // Return optimistic template data
-  return {
-    id: `temp-${Date.now()}`,
-    name: templateData.documents[0].name,
-    mimeType: 'application/pdf',
-  };
 };
 
 function App() {
   const queryClient = useQueryClient();
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
-  const [formFields, setFormFields] = useState<FormField[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'select' | 'preview' | 'processing'>('select');
 
 
-  // TanStack Query for data fetching
-  const { data: clients = [], isLoading: clientsLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: fetchClients,
-  });
+  // No data fetching needed for simplified app
 
-  const { data: templates = [], isLoading: templatesLoading } = useQuery({
-    queryKey: ['templates'],
-    queryFn: fetchTemplates,
-  });
-
-  // Optimistic Mutations
+  // Simple Mutations
   const clientMutation = useMutation({
     mutationFn: uploadClient,
-    onMutate: async (newClientData) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['clients'] });
-      
-      // Snapshot previous value
-      const previousClients = queryClient.getQueryData<Client[]>(['clients']);
-      
-      // Optimistically update cache
-      const optimisticClient: Client = {
-        id: `optimistic-${Date.now()}`,
-        name: newClientData.name,
-        createdTime: new Date().toISOString(),
-        isPending: true,
-      };
-      
-      queryClient.setQueryData<Client[]>(['clients'], (old = []) => [
-        ...old,
-        optimisticClient,
-      ]);
-      
-      return { previousClients, optimisticClient };
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousClients) {
-        queryClient.setQueryData(['clients'], context.previousClients);
-      }
+    onError: () => {
       toast.error('Failed to add client');
     },
     onSuccess: () => {
       toast.success('Client added successfully!');
     },
-    onSettled: () => {
-      // Refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-    },
   });
 
   const templateMutation = useMutation({
     mutationFn: uploadTemplate,
-    onMutate: async (newTemplateData) => {
-      await queryClient.cancelQueries({ queryKey: ['templates'] });
-      
-      const previousTemplates = queryClient.getQueryData<DocumentTemplate[]>(['templates']);
-      
-      const optimisticTemplate: DocumentTemplate = {
-        id: `optimistic-${Date.now()}`,
-        name: newTemplateData.documents[0].name,
-        mimeType: 'application/pdf',
-        isPending: true,
-      };
-      
-      queryClient.setQueryData<DocumentTemplate[]>(['templates'], (old = []) => [
-        ...old,
-        optimisticTemplate,
-      ]);
-      
-      return { previousTemplates, optimisticTemplate };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousTemplates) {
-        queryClient.setQueryData(['templates'], context.previousTemplates);
-      }
+    onError: () => {
       toast.error('Failed to upload template');
     },
     onSuccess: () => {
       toast.success('Template uploaded successfully!');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['templates'] });
-    },
   });
 
-  // Form handlers using optimistic mutations
-
-  const previewForm = async () => {
-    if (!selectedTemplate || !selectedClient) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/parse_form`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedTemplate.name,
-          name: selectedClient.name
-        }),
-      });
-      const fields = await response.json();
-      setFormFields(fields);
-      setStep('preview');
-      toast.success('Form analyzed successfully!');
-    } catch (error) {
-      toast.error('Failed to analyze form');
-      console.error('Error analyzing form:', error);
-    }
-    setLoading(false);
-  };
-
-  const generateDocument = async () => {
-    if (!selectedTemplate || !selectedClient) return;
-
-    setLoading(true);
-    setStep('processing');
-    try {
-      const response = await fetch(`${API_BASE_URL}/fill_form`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedTemplate.name,
-          name: selectedClient.name
-        }),
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${selectedClient.name}_${selectedTemplate.name}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        toast.success('Document generated and downloaded successfully!');
-        setStep('select');
-      } else {
-        throw new Error('Failed to generate document');
-      }
-    } catch (error) {
-      toast.error('Failed to generate document');
-      console.error('Error generating document:', error);
-      setStep('preview');
-    }
-    setLoading(false);
-  };
-
-  const resetSelection = () => {
-    setSelectedClient(null);
-    setSelectedTemplate(null);
-    setFormFields([]);
-    setStep('select');
-  };
+  // Form handlers
 
   const handleClientUpload = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -294,7 +108,6 @@ function App() {
       clientData.documents = Array.from(fileInput.files);
     }
     
-    // Use optimistic mutation
     clientMutation.mutate(clientData, {
       onSuccess: () => {
         form.reset();
@@ -316,7 +129,6 @@ function App() {
       documents: Array.from(fileInput.files),
     };
     
-    // Use optimistic mutation
     templateMutation.mutate(templateData, {
       onSuccess: () => {
         form.reset();
@@ -361,119 +173,15 @@ function App() {
                 <p className="text-gray-600">AI-powered document generation and management</p>
               </div>
               <div className="flex space-x-3">
-                {step !== 'select' && (
-                  <Button 
-                    onClick={resetSelection}
-                    variant="outline"
-                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                  >
-                    Start Over
-                  </Button>
-                )}
+                {/* Action buttons can be added here in the future */}
               </div>
             </div>
           </div>
         </header>
 
         <main className="p-6">
-        {step === 'select' && (
-          <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Client Selection */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900">Select Client</h2>
-                  <span className="text-sm text-gray-500">{clients.length} clients</span>
-                </div>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {clientsLoading && (
-                    <div className="flex items-center justify-center py-8">
-                      <Spinner className="w-6 h-6 mr-2" />
-                      <span className="text-gray-500">Loading clients...</span>
-                    </div>
-                  )}
-                  {clients.map((client) => (
-                    <div
-                      key={client.id}
-                      onClick={() => !client.isPending && setSelectedClient(client)}
-                      className={`p-4 border rounded-lg transition-colors ${
-                        client.isPending
-                          ? 'border-yellow-300 bg-yellow-50 opacity-75 cursor-wait'
-                          : selectedClient?.id === client.id
-                          ? 'border-blue-500 bg-blue-50 cursor-pointer'
-                          : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900 flex items-center">
-                            {client.name}
-                            {client.isPending && (
-                              <Spinner className="w-4 h-4 ml-2" />
-                            )}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {client.isPending ? 'Adding...' : client.createdTime ? `Created: ${new Date(client.createdTime).toLocaleDateString()}` : 'Recently added'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {clients.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
-                      No clients found. Add a client below to get started.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Template Selection */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900">Select Document Template</h2>
-                  <span className="text-sm text-gray-500">{templates.length} templates</span>
-                </div>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {templatesLoading && (
-                    <div className="flex items-center justify-center py-8">
-                      <Spinner className="w-6 h-6 mr-2" />
-                      <span className="text-gray-500">Loading templates...</span>
-                    </div>
-                  )}
-                  {templates.map((template) => (
-                    <div
-                      key={template.id}
-                      onClick={() => !template.isPending && setSelectedTemplate(template)}
-                      className={`p-4 border rounded-lg transition-colors ${
-                        template.isPending
-                          ? 'border-yellow-300 bg-yellow-50 opacity-75 cursor-wait'
-                          : selectedTemplate?.id === template.id
-                          ? 'border-blue-500 bg-blue-50 cursor-pointer'
-                          : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                      }`}
-                    >
-                      <h3 className="font-medium text-gray-900 flex items-center">
-                        {template.name}
-                        {template.isPending && (
-                          <Spinner className="w-4 h-4 ml-2" />
-                        )}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {template.isPending ? 'Uploading...' : 'PDF Document'}
-                      </p>
-                    </div>
-                  ))}
-                  {templates.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
-                      No templates found. Upload a template below to get started.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Upload Forms */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Upload Forms */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Add New Client */}
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -547,7 +255,7 @@ function App() {
                     disabled={clientMutation.isPending}
                     className="w-full bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {clientMutation.isPending ? <Spinner className="w-4 h-4 mr-2" /> : null}
+                    {clientMutation.isPending ? <Spinner /> : null}
                     {clientMutation.isPending ? 'Adding Client...' : 'Add Client'}
                   </Button>
                 </form>
@@ -598,86 +306,12 @@ function App() {
                     disabled={templateMutation.isPending}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    {templateMutation.isPending ? <Spinner className="w-4 h-4 mr-2" /> : null}
+                    {templateMutation.isPending ? <Spinner /> : null}
                     {templateMutation.isPending ? 'Uploading...' : 'Upload Template'}
                   </Button>
                 </form>
               </div>
-            </div>
-          </>
-        )}
-
-        {step === 'select' && selectedClient && selectedTemplate && (
-          <div className="mt-8 text-center">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Ready to Generate Document</h3>
-              <p className="text-gray-600 mb-6">
-                Client: <span className="font-medium">{selectedClient.name}</span> | 
-                Template: <span className="font-medium">{selectedTemplate.name}</span>
-              </p>
-              <Button 
-                onClick={previewForm}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-              >
-                {loading ? <Spinner className="w-4 h-4 mr-2" /> : null}
-                Analyze Form & Preview
-              </Button>
-            </div>
           </div>
-        )}
-
-        {step === 'preview' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Form Preview</h2>
-            <div className="mb-6">
-              <p className="text-gray-600">
-                Document: <span className="font-medium">{selectedTemplate?.name}</span> for{' '}
-                <span className="font-medium">{selectedClient?.name}</span>
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {formFields.map((field) => (
-                <div key={field.id} className="border rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900">{field.name}</h4>
-                  <p className="text-sm text-gray-500 mb-2">{field.description}</p>
-                  <p className="text-xs text-gray-400">Page {field.page}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-center space-x-4">
-              <Button 
-                onClick={() => setStep('select')}
-                variant="outline"
-                className="text-gray-600 border-gray-300"
-              >
-                Back to Selection
-              </Button>
-              <Button 
-                onClick={generateDocument}
-                disabled={loading}
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-              >
-                {loading ? <Spinner className="w-4 h-4 mr-2" /> : null}
-                Generate & Download PDF
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === 'processing' && (
-          <div className="text-center py-12">
-            <div className="bg-white rounded-lg shadow p-8">
-              <Spinner className="w-12 h-12 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Generating Document</h3>
-              <p className="text-gray-600">
-                AI is filling out the form with {selectedClient?.name}'s information...
-              </p>
-            </div>
-          </div>
-        )}
         </main>
       </div>
 
