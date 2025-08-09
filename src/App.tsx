@@ -149,6 +149,8 @@ function App() {
   >({});
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // No data fetching needed for simplified app
 
@@ -165,20 +167,60 @@ function App() {
 
   // Form handlers
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedFile(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    // Reset the file input
+    const fileInput = document.getElementById(
+      'pdf-document'
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(false);
+
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type === 'application/pdf') {
+        setUploadedFile(file);
+      } else {
+        toast.error('Please select a PDF file');
+      }
+    }
+  };
+
   const handleDocumentUploadSubmit = (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-    const form = event.currentTarget;
 
-    const fileInput = form.elements.namedItem('Documents') as HTMLInputElement;
-    let documents: File[] = [];
-
-    if (fileInput.files && fileInput.files.length > 0) {
-      documents = [fileInput.files[0]]; // Take only the first file
+    if (!uploadedFile) {
+      toast.error('Please select a PDF file to upload');
+      return;
     }
 
-    setCurrentClientData((prev) => ({ ...prev, documents }));
+    setCurrentClientData((prev) => ({ ...prev, documents: [uploadedFile] }));
     setCurrentStep('client_info');
   };
 
@@ -224,6 +266,7 @@ function App() {
         setCurrentStep('document_upload');
         setCurrentClientData({});
         setSelectedClient(null);
+        setUploadedFile(null);
         form.reset();
       },
     });
@@ -492,6 +535,7 @@ function App() {
                         setCurrentStep('document_upload');
                         setCurrentClientData({});
                         setSelectedClient(null);
+                        setUploadedFile(null);
                       }}
                       className="text-gray-400 hover:text-gray-600"
                     >
@@ -563,19 +607,149 @@ function App() {
                       <div>
                         <label
                           htmlFor="pdf-document"
-                          className="block text-sm font-medium text-gray-700 mb-1"
+                          className="block text-sm font-medium text-gray-700 mb-2"
                         >
                           PDF Form Document *
                         </label>
-                        <input
-                          id="pdf-document"
-                          name="Documents"
-                          type="file"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                          accept=".pdf"
-                          required
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
+
+                        {!uploadedFile ? (
+                          <div className="relative">
+                            <input
+                              id="pdf-document"
+                              name="Documents"
+                              type="file"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              accept=".pdf"
+                              required
+                              onChange={handleFileSelect}
+                            />
+                            <div
+                              className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 ${isDragOver ? 'border-purple-400 bg-purple-50' : 'hover:border-purple-400 hover:bg-purple-50'}`}
+                              onDragOver={handleDragOver}
+                              onDragLeave={handleDragLeave}
+                              onDrop={handleDrop}
+                            >
+                              <div className="flex flex-col items-center">
+                                {isDragOver ? (
+                                  <>
+                                    <svg
+                                      className="mx-auto h-12 w-12 text-purple-500 mb-4"
+                                      stroke="currentColor"
+                                      fill="none"
+                                      viewBox="0 0 48 48"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                        strokeWidth={2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                    <div className="text-lg font-medium text-purple-700 mb-2">
+                                      Drop your PDF file here
+                                    </div>
+                                    <div className="text-sm text-purple-600">
+                                      Release to upload
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg
+                                      className="mx-auto h-12 w-12 text-gray-400 mb-4"
+                                      stroke="currentColor"
+                                      fill="none"
+                                      viewBox="0 0 48 48"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                        strokeWidth={2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                    <div className="text-lg font-medium text-gray-900 mb-2">
+                                      Choose a PDF file
+                                    </div>
+                                    <div className="text-sm text-gray-500 mb-4">
+                                      or drag and drop here
+                                    </div>
+                                    <div className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                      <svg
+                                        className="w-4 h-4 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m3-3v12"
+                                        />
+                                      </svg>
+                                      Browse Files
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="border border-gray-200 rounded-lg p-4 bg-green-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <svg
+                                  className="w-8 h-8 text-green-500 mr-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                                <div>
+                                  <div className="text-sm font-medium text-green-800">
+                                    {uploadedFile.name}
+                                  </div>
+                                  <div className="text-xs text-green-600">
+                                    {(uploadedFile.size / 1024 / 1024).toFixed(
+                                      2
+                                    )}{' '}
+                                    MB
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemoveFile}
+                                className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                                title="Remove file"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <p className="text-xs text-gray-500 mt-2">
                           Upload a single PDF form document
                         </p>
                       </div>
@@ -597,7 +771,10 @@ function App() {
                       <div className="flex justify-end space-x-3 pt-4">
                         <Button
                           type="button"
-                          onClick={() => setShowAddNew(false)}
+                          onClick={() => {
+                            setShowAddNew(false);
+                            setUploadedFile(null);
+                          }}
                           className="px-6 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
                         >
                           Cancel
@@ -789,8 +966,8 @@ function App() {
                           >
                             {clientMutation.isPending ? <Spinner /> : null}
                             {clientMutation.isPending
-                              ? 'Adding Document...'
-                              : 'Add Document'}
+                              ? 'Filing Document...'
+                              : 'File Document'}
                           </Button>
                         </div>
                       </form>

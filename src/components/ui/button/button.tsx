@@ -21,7 +21,7 @@ const baseClasses = `
 
 const variantClasses = {
   default: 'bg-blue-600 text-white hover:bg-blue-700',
-  outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+  outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
 };
 
 export default function Button({
@@ -33,7 +33,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const classes = className || `${baseClasses} ${variantClasses[variant]}`;
-  
+
   return (
     <button type="button" className={classes} {...props}>
       {isLoading ? <Spinner /> : (children ?? text)}
