@@ -325,30 +325,57 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">DocuBubble</h1>
-            </div>
-            <div className="flex space-x-3">
-              {step !== 'select' && (
-                <Button 
-                  onClick={resetSelection}
-                  variant="outline"
-                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                >
-                  Start Over
-                </Button>
-              )}
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-lg">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-gray-900">DocuBubble</h1>
+          <p className="text-sm text-gray-600 mt-1">AI Document System</p>
+        </div>
+        
+        <nav className="mt-6">
+          <div className="px-6">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Main</h2>
+            <ul className="space-y-1">
+              <li>
+                <div className="bg-blue-50 text-blue-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                  <svg className="text-blue-500 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Dashboard
+                </div>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* Top Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="px-6 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+                <p className="text-gray-600">AI-powered document generation and management</p>
+              </div>
+              <div className="flex space-x-3">
+                {step !== 'select' && (
+                  <Button 
+                    onClick={resetSelection}
+                    variant="outline"
+                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                  >
+                    Start Over
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="p-6">
         {step === 'select' && (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -651,9 +678,8 @@ function App() {
             </div>
           </div>
         )}
-      </main>
-
-
+        </main>
+      </div>
 
       <ToastContainer 
         position="top-right"
