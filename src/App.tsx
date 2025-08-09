@@ -484,7 +484,7 @@ function App() {
                 <div className="p-6 border-b">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      Add New Document
+                      File New Document
                     </h3>
                     <button
                       onClick={() => {
