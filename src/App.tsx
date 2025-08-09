@@ -191,7 +191,7 @@ function App() {
   const getStatusColor = (status: TrackerItem['status']) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'in_progress': return 'bg-purple-100 text-purple-800';
       case 'completed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -200,7 +200,7 @@ function App() {
   const getStatusDot = (status: TrackerItem['status']) => {
     switch (status) {
       case 'pending': return 'bg-yellow-400';
-      case 'in_progress': return 'bg-blue-400';
+      case 'in_progress': return 'bg-purple-400';
       case 'completed': return 'bg-green-400';
       default: return 'bg-gray-400';
     }
@@ -209,7 +209,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
+      <div className="w-64 bg-white shadow-lg border-r border-gray-200">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-gray-900">DocuBubble</h1>
           <p className="text-sm text-gray-600 mt-1">Powered by Bubble Lab, Inc.</p>
@@ -220,8 +220,8 @@ function App() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Main</h2>
             <ul className="space-y-1">
               <li>
-                <div className="bg-blue-50 text-blue-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                  <svg className="text-blue-500 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-purple-50 text-purple-700 group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg border border-purple-100">
+                  <svg className="text-purple-500 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                   Dashboard
@@ -240,7 +240,6 @@ function App() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-                <p className="text-gray-600">AI-powered document generation and management</p>
               </div>
               <div className="flex space-x-3">
                 {/* Action buttons can be added here in the future */}
@@ -251,17 +250,17 @@ function App() {
 
         <main className="p-6">
           {/* Client & Document Tracker */}
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             {/* Tracker Header */}
-            <div className="p-6 border-b">
+            <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">Client & Document Tracker</h3>
-                  <p className="text-gray-600 mt-1">Track project health and progress across clients.</p>
+                  <p className="text-gray-600 mt-1">AI-powered document generation and management</p>
                 </div>
                 <Button 
                   onClick={() => setShowAddNew(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
                 >
                   + Add New
                 </Button>
@@ -289,15 +288,15 @@ function App() {
                     </tr>
                   ) : (
                     trackerItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className={`w-2 h-2 rounded-full mr-3 ${getStatusDot(item.status)}`}></div>
+                            <div className={`w-2.5 h-2.5 rounded-full mr-3 ${getStatusDot(item.status)}`}></div>
                             <span className="text-sm font-medium text-gray-900">{item.name}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
+                          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
                             {item.status === 'in_progress' ? 'On track' : item.status}
                           </span>
                         </td>
@@ -305,7 +304,7 @@ function App() {
                           <div className="flex items-center">
                             <div className="w-16 bg-gray-200 rounded-full h-2 mr-3">
                               <div 
-                                className="bg-blue-600 h-2 rounded-full" 
+                                className="bg-purple-600 h-2 rounded-full transition-all duration-300" 
                                 style={{ width: `${item.progress}%` }}
                               ></div>
                             </div>
@@ -336,7 +335,7 @@ function App() {
           {/* Add New Client Modal/Form */}
           {showAddNew && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+              <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto border border-gray-200">
                 {/* Modal Header */}
                 <div className="p-6 border-b">
                   <div className="flex justify-between items-center">
@@ -357,20 +356,20 @@ function App() {
                   
                   {/* Steps Indicator */}
                   <div className="mt-4 flex items-center">
-                    <div className={`flex items-center ${currentStep === 'document_upload' ? 'text-blue-600' : 'text-green-600'}`}>
+                    <div className={`flex items-center ${currentStep === 'document_upload' ? 'text-purple-600' : 'text-green-600'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        currentStep === 'document_upload' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
+                        currentStep === 'document_upload' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'
                       }`}>
                         {currentStep === 'document_upload' ? '1' : '✓'}
                       </div>
                       <span className="ml-2 text-sm font-medium">Upload Documents</span>
                     </div>
                     <div className="flex-1 mx-4">
-                      <div className={`h-1 rounded ${currentStep === 'client_info' ? 'bg-blue-200' : 'bg-gray-200'}`}></div>
+                      <div className={`h-1 rounded ${currentStep === 'client_info' ? 'bg-purple-200' : 'bg-gray-200'}`}></div>
                     </div>
-                    <div className={`flex items-center ${currentStep === 'client_info' ? 'text-blue-600' : 'text-gray-400'}`}>
+                    <div className={`flex items-center ${currentStep === 'client_info' ? 'text-purple-600' : 'text-gray-400'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        currentStep === 'client_info' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
+                        currentStep === 'client_info' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'
                       }`}>
                         2
                       </div>
@@ -390,7 +389,7 @@ function App() {
                         <input
                           name="Documents"
                           type="file"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                           accept=".pdf"
                           required
                         />
@@ -399,7 +398,7 @@ function App() {
                         </p>
                       </div>
 
-                      <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
                         <h4 className="font-medium text-gray-900 mb-2">PDF Form Requirements:</h4>
                         <ul className="text-sm text-gray-600 space-y-1">
                           <li>• Must be a PDF file with fillable form fields</li>
@@ -413,13 +412,13 @@ function App() {
                         <Button
                           type="button"
                           onClick={() => setShowAddNew(false)}
-                          className="bg-gray-300 hover:bg-gray-400 text-gray-700"
+                          className="px-6 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
                         >
                           Cancel
                         </Button>
                         <Button
                           type="submit"
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
                         >
                           Continue
                         </Button>
@@ -447,7 +446,7 @@ function App() {
                         </label>
                         <select
                           name="Doc type"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                           defaultValue={currentClientData.docType || 'Passport'}
                           required
                         >
@@ -465,12 +464,12 @@ function App() {
                           name="Content"
                           placeholder="Enter any additional client information..."
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                           defaultValue={currentClientData.content || ''}
                         />
                       </div>
 
-                      <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
                         <h4 className="font-medium text-gray-900 mb-2">PDF Form Summary:</h4>
                         <div className="text-sm text-gray-600">
                           {currentClientData.documents && currentClientData.documents.length > 0 ? (
@@ -485,14 +484,14 @@ function App() {
                         <Button
                           type="button"
                           onClick={() => setCurrentStep('document_upload')}
-                          className="bg-gray-300 hover:bg-gray-400 text-gray-700"
+                          className="px-6 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
                         >
                           Back
                         </Button>
                         <Button
                           type="submit"
                           disabled={clientMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
                         >
                           {clientMutation.isPending ? <Spinner /> : null}
                           {clientMutation.isPending ? 'Adding Client...' : 'Complete'}
