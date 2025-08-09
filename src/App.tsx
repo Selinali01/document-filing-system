@@ -4,7 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { AdminPanel } from './components/AdminPanel';
+
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
@@ -118,7 +118,7 @@ function App() {
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'select' | 'preview' | 'processing'>('select');
-  const [showAdmin, setShowAdmin] = useState(false);
+
 
   // TanStack Query for data fetching
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
@@ -331,17 +331,10 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Document Filing System</h1>
+              <h1 className="text-3xl font-bold text-gray-900">DocuBubble</h1>
               <p className="text-gray-600">AI-powered document generation and management</p>
             </div>
             <div className="flex space-x-3">
-              <Button 
-                onClick={() => setShowAdmin(true)}
-                variant="outline"
-                className="text-green-600 border-green-600 hover:bg-green-50"
-              >
-                Admin Panel
-              </Button>
               {step !== 'select' && (
                 <Button 
                   onClick={resetSelection}
@@ -661,9 +654,7 @@ function App() {
         )}
       </main>
 
-      {showAdmin && (
-        <AdminPanel onClose={() => setShowAdmin(false)} />
-      )}
+
 
       <ToastContainer 
         position="top-right"
