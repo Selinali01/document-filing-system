@@ -234,21 +234,13 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1">
-        {/* Top Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-              </div>
-              <div className="flex space-x-3">
-                {/* Action buttons can be added here in the future */}
-              </div>
-            </div>
-          </div>
-        </header>
-
         <main className="p-6">
+          {/* Dashboard Title */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+            <p className="text-gray-600 mt-1">AI-powered document generation and management</p>
+          </div>
+
           {/* Client & Document Tracker */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             {/* Tracker Header */}
@@ -256,7 +248,7 @@ function App() {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">Client & Document Tracker</h3>
-                  <p className="text-gray-600 mt-1">AI-powered document generation and management</p>
+                  <p className="text-gray-600 mt-1">Track filing progress and document generation</p>
                 </div>
                 <Button 
                   onClick={() => setShowAddNew(true)}
