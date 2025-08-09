@@ -142,7 +142,7 @@ function App() {
       <div className="w-64 bg-white shadow-lg">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-gray-900">DocuBubble</h1>
-          <p className="text-sm text-gray-600 mt-1">AI Document System</p>
+          <p className="text-sm text-gray-600 mt-1">Powered by Bubble Lab, Inc.</p>
         </div>
         
         <nav className="mt-6">
