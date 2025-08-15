@@ -7,6 +7,7 @@ import {
   useFiling,
   TrackerItem,
 } from '@/features/filing';
+import { TopBar } from '@/components/ui';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -153,6 +154,7 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1">
+        <TopBar onSearch={(query) => console.log('Search query:', query)} />
         <main className="p-6">
           {/* Dashboard View */}
           {activeView === 'dashboard' && (
