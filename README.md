@@ -28,6 +28,12 @@ This is a template repository to set up a project using React, React Query, Zust
 
 :white_check_mark: Includes example components to get started quickly
 
+:white_check_mark: Sidebar navigation with Dashboard and Clients sections
+
+:white_check_mark: Client management system with search functionality
+
+:white_check_mark: Document filing workflow system
+
 ## Required Versions
 
 | Tool        | Version    |
@@ -84,7 +90,14 @@ Here's a basic overview of the significant folders in the boilerplate:
 ├── public
 └── src
     ├── components
+    │   ├── ui
+    │   └── Dashboard.tsx
+    ├── data
+    │   └── clients.ts
     ├── features
+    │   ├── filing
+    │   ├── home
+    │   └── login
     ├── hooks
     ├── lib
     ├── routes
@@ -96,6 +109,8 @@ Here's a basic overview of the significant folders in the boilerplate:
 |-------------|------------------------------------------------------------------------------------------------------|
 | **`src/`**   | Contains the main source code for the application.                                                   |
 | `components/ui` | Reusable UI components, each in its own folder (e.g., button, input, spinner, header).            |
+| `components` | Main application components and UI components.                                                    |
+| `data`      | Application-wide data files including client information.                                          |
 | `features`  | Feature-based modules, each with its own domain logic, pages, hooks, services, and types.             |
 | `hooks`     | Shared custom React hooks that can be used across features.                                           |
 | `lib`       | Miscellaneous utility functions, helpers, and other standalone pieces of logic.                       |

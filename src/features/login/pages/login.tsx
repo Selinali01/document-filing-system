@@ -53,7 +53,9 @@ export default function LoginPage() {
         register={register}
         name="password"
       />
-      <Button text="Login" type="submit" isLoading={mutation.isPending} />
+      <Button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? 'Logging in...' : 'Login'}
+      </Button>
     </form>
   );
 }

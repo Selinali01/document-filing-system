@@ -1,4 +1,4 @@
-import { Client } from '../types';
+import { Client } from '@/features/filing/types';
 
 export const hardcodedClients: Client[] = [
   {
@@ -63,6 +63,43 @@ export const hardcodedClients: Client[] = [
         name: 'Credit Card Statement',
         type: 'Bills',
         uploadDate: '2024-01-12',
+        status: 'verified',
+      },
+    ],
+  },
+  {
+    id: '4',
+    name: 'Emily Davis',
+    email: 'emily.davis@email.com',
+    phone: '+1 (555) 234-5678',
+    previousDocuments: [
+      {
+        id: 'doc7',
+        name: 'Driver License Renewal',
+        type: 'License',
+        uploadDate: '2024-01-22',
+        status: 'verified',
+      },
+      {
+        id: 'doc8',
+        name: 'Insurance Certificate',
+        type: 'Insurance',
+        uploadDate: '2024-01-19',
+        status: 'pending_verification',
+      },
+    ],
+  },
+  {
+    id: '5',
+    name: 'David Wilson',
+    email: 'david.wilson@email.com',
+    phone: '+1 (555) 345-6789',
+    previousDocuments: [
+      {
+        id: 'doc9',
+        name: 'Tax Return',
+        type: 'Tax',
+        uploadDate: '2024-01-25',
         status: 'verified',
       },
     ],
